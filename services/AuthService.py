@@ -30,11 +30,8 @@ def decodificar_token_jwt(token: str): # Define uma função que irá desencript
         else: return None # Se o tempo for menor ao horário atual retorna None indicando que o token é inválido
 
     except Exception as erro:
-        return {
-            "mensagem": "Erro interno no servidor",
-            "dados": str(erro),
-            "status": 500
-        }
+        return None
+
 
 
 async def login_service(usuario: UsuarioLoginModel): # define a função login service recebendo como parametro um
