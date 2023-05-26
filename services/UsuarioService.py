@@ -1,4 +1,4 @@
-from models.UsuarioModel import UsuarioCriarModel
+from models.UsuarioModel import UsuarioCriarModel, UsuarioAtualizarModel
 from providers.AWSProvider import AWSProvider
 from repositories.UsuarioRepository import UsuarioRepository
 
@@ -55,6 +55,38 @@ class UsuarioServices:
                 return { # Retorna uma mensagem de sucesso e os dados do usuário
                     "mensagem": "Usuário encontrado",
                     "dados": usuario_encontrado,
+                    "status": 200
+                }
+
+            else:
+                return {
+                    "mensagem": f"Usuário com o {id} não foi encontrado",
+                    "status": 404
+                }
+        except Exception as error:
+            print(error)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
+    async def atualizar_usuario_logado(self, id, usuarioAtualizar: UsuarioAtualizarModel, caminho_foto: str):
+        try:
+            usuario_encontrado = await usuarioRepository.buscar_usuario_por_id(id)
+
+            if usuario_encontrado:
+                try:
+                    url_foto = awsProvider.upload_arquivo_s3(f'fotos-perfil/{id}.png',
+                                                             caminho_foto).split('?')[0]
+
+                    await usuarioRepository.atualizar_usuario(id, {'avatar': url_foto})
+                except Exception as erro:
+                    print(erro)
+                usuario_atualizado = await usuarioRepository.atualizar_usuario(id, usuarioAtualizar.__dict__)
+                usuario_atualizado['senha'] = ''
+                return {
+                    "mensagem": "Usuário atualizado com sucesso",
+                    "dados": usuario_atualizado,
                     "status": 200
                 }
 

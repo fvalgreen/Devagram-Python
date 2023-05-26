@@ -18,7 +18,7 @@ class AuthServices:
 
         payload = {  # Criando um payload para o token que passa o id do usuário e um tempo de expiração
             "usuario_id": usuario_id,
-            "expires": time.time() + 600
+            "expires": time.time() + 6000
         }
 
         token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")  # Criando o token passando o payload criado e
