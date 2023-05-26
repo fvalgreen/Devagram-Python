@@ -1,19 +1,11 @@
-from fastapi import Form, UploadFile
 from pydantic import BaseModel, Field, EmailStr
+from utils.DecoratorUtil import DecoratorUtil
+
+decoratorUtil = DecoratorUtil()
 
 
-def form_body(cls):
-    cls.__signature__ = cls.__signature__.replace(
-        parameters=[
-            arg.replace(default=Form(...))
-            for arg in cls.__signature__.parameters.values()
-        ]
-    )
-    return cls
-
-
-@form_body
-class UsuarioCriarModel(BaseModel):   # Criando uma classe UsuarioCriarModel que herda as propriedades da classe
+@decoratorUtil.form_body
+class UsuarioCriarModel(BaseModel):  # Criando uma classe UsuarioCriarModel que herda as propriedades da classe
     # BaseModel
     nome: str = Field(...)  # Definindo a propriedade nome do tipo string
     email: EmailStr = Field(...)  # Definimos a propriedade email do tipo Emailstr do Pydantic
@@ -73,7 +65,8 @@ class UsuarioLoginModel(BaseModel):
             }
         }
 
-@form_body
+
+@decoratorUtil.form_body
 class UsuarioAtualizarModel(BaseModel):
     nome: str = Field(...)
 

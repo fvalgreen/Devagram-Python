@@ -17,7 +17,7 @@ class ConverterUtil:
     def postagem_converter(postagem):
         return {
             "id": str(postagem["_id"]),
-            "usuario": postagem["usuario"],
+            "usuario_id": str(postagem["usuario_id"]),
             "foto": postagem["foto"],
             "legenda": postagem["legenda"],
             "data": postagem["data"],

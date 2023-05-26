@@ -1,8 +1,7 @@
 from pydantic import BaseModel, Field
 
-from models.UsuarioModel import UsuarioModel
 
 
 class ComentarioModel(BaseModel):
-    usuario: UsuarioModel = Field(...)
+    usuario_id: str = Field(...)
     comentario: str = Field(...)

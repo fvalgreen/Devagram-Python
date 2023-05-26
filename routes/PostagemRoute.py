@@ -1,41 +1,37 @@
-import os
-from datetime import datetime
-from fastapi import APIRouter, HTTPException, Depends, Header, UploadFile
+from fastapi import APIRouter, HTTPException, Depends, Header
 from middlewares.JWTMiddleware import verificar_token
 from models.PostagemModel import PostagemCriarModel
+from services.AuthService import AuthServices
+from services.PostagemServices import PostagemServices
+from services.UsuarioService import UsuarioServices
 
 router = APIRouter()  # Instanciando o APIRouter no router
 
+postagemService = PostagemServices()
+authServices = AuthServices()
+usuarioServices = UsuarioServices()
+
 
 @router.post('/',
-             response_description="Rota para criar uma nova postagem")
-async def rota_criar_postagem(file: UploadFile, postagem: PostagemCriarModel = Depends(PostagemCriarModel)):
-    caminho_foto = f'files/foto-{datetime.now().strftime("%H%M%S")}'
-
-    with open(caminho_foto, 'wb+') as arquivo:
-        arquivo.write(file.file.read())
-
-    # resultado = await registrar_usuario(usuario, caminho_foto)
-
-    os.remove(caminho_foto)
-    return {"teste": "OK!"}
-
-
-@router.get('/', response_description="Rota para listar as postagens", dependencies=[Depends(
-    verificar_token)])
-async def listar_postagens(Authorization: str = Header(default='')):
+             response_description="Rota para criar uma nova postagem", dependencies=[Depends(
+                                                                                        verificar_token)])
+async def rota_criar_postagem(Authorization: str = Header(default=''), postagem: PostagemCriarModel
+= Depends(PostagemCriarModel)):
     try:
-        return {"teste": "OK!"}
-    except Exception as erro:
-        print(erro)
-        raise HTTPException(status_code=500, detail="Erro interno no servidor")
+        token = Authorization.split(" ")[1]
+        payload = authServices.decodificar_token_jwt(token)
+
+        # resultado_usuario = await usuarioServices.buscar_usuario(payload["usuario_id"])
+
+        # usuario = resultado["dados"]
+
+        resultado = await postagemService.criar_postagem(postagem, payload['usuario_id'])
+
+        if not resultado["status"] == 201:
+            raise HTTPException(status_code=resultado["status"], detail=resultado["mensagem"])
+        print(resultado)
+        return resultado
 
 
-@router.get('/me', response_description="Rota para listar as postagens do usuário", dependencies=[Depends(
-    verificar_token)])
-async def buscar_dados_usuario_logado(Authorization: str = Header(default='')):
-    try:
-        return {"teste": "OK!"}
     except Exception as erro:
-        print(erro)
-        raise HTTPException(status_code=500, detail="Erro interno no servidor")
+        raise erro
