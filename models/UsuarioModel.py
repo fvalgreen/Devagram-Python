@@ -1,6 +1,7 @@
 from fastapi import Form
 from pydantic import BaseModel, Field, EmailStr
 
+
 def form_body(cls):
     cls.__signature__ = cls.__signature__.replace(
         parameters=[
@@ -9,18 +10,21 @@ def form_body(cls):
         ]
     )
     return cls
-@form_body
-class UsuarioCriarModel(BaseModel): #Criando uma classe UsuarioCriarModel que herda as propriedades da classe BaseModel
-    nome: str = Field(...) # Definindo a propriedade nome do tipo string
-    email: EmailStr = Field(...) # Definimos a propriedade email do tipo Emailstr do Pydantic
-    senha: str = Field(...) # Definindo a propriedade senha do tipo string
-    seguidores: int = Field(...) # Definindo a propriedade seguidores do tipo inteiro
-    seguindo: int = Field(...) # Definindo a propriedade seguindo do tipo inteiro
-    publicacoes: int = Field(...) # Definindo a propriedade publicações do tipo inteiro
 
-    class Config: # Criando a class config para servir como exemplo na documentação da api
+
+@form_body
+class UsuarioCriarModel(BaseModel):   # Criando uma classe UsuarioCriarModel que herda as propriedades da classe
+    # BaseModel
+    nome: str = Field(...)  # Definindo a propriedade nome do tipo string
+    email: EmailStr = Field(...)  # Definimos a propriedade email do tipo Emailstr do Pydantic
+    senha: str = Field(...)  # Definindo a propriedade senha do tipo string
+    seguidores: int = Field(...)  # Definindo a propriedade seguidores do tipo inteiro
+    seguindo: int = Field(...)  # Definindo a propriedade seguindo do tipo inteiro
+    publicacoes: int = Field(...)  # Definindo a propriedade publicações do tipo inteiro
+
+    class Config:  # Criando a class config para servir como exemplo na documentação da api
         schema_extra = {
-            "usuario": { # define que a class UsuarioCriarModel espera um usuário com as seguintes propriedades
+            "usuario": {  # define que a class UsuarioCriarModel espera um usuário com as seguintes propriedades
                 "id": "dsfasfdasdfa",
                 "nome": "Fulano",
                 "email": "fulano@gmail.com",
@@ -31,6 +35,7 @@ class UsuarioCriarModel(BaseModel): #Criando uma classe UsuarioCriarModel que he
                 "publicacoes": 0
             }
         }
+
 
 class UsuarioModel(BaseModel):
     id: str = Field(...)
@@ -54,6 +59,8 @@ class UsuarioModel(BaseModel):
                 "publicacoes": 0
             }
         }
+
+
 class UsuarioLoginModel(BaseModel):
     email: EmailStr = Field(...)
     senha: str = Field(...)

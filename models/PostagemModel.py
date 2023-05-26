@@ -27,11 +27,11 @@ class PostagemModel(BaseModel):
             }
         }
 
+
 class PostagemCriarModel(BaseModel):
     usuario: UsuarioModel = Field(...)
     foto: str = Field(...)
     legenda: str = Field(...)
-
 
     class Config:
         schema_extra = {
