@@ -22,10 +22,6 @@ async def rota_criar_postagem(Authorization: str = Header(default=''),
         token = Authorization.split(" ")[1]
         payload = authServices.decodificar_token_jwt(token)
 
-        # resultado_usuario = await usuarioServices.buscar_usuario(payload["usuario_id"])
-
-        # usuario = resultado["dados"]
-
         resultado = await postagemService.criar_postagem(postagem, payload['usuario_id'])
 
         if not resultado["status"] == 201:

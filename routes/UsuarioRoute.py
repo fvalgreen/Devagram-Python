@@ -55,9 +55,9 @@ async def buscar_dados_usuario_logado(Authorization: str = Header(default='')):
 
 @router.put('/me', response_description="Rota para atualizar os dados do usuário logado", dependencies=[Depends(
     verificar_token)])
-async def buscar_dados_usuario_logado(file: UploadFile, Authorization: str = Header(default=''),
-                                      usuario_atualizar: UsuarioAtualizarModel =
-                                      Depends(UsuarioAtualizarModel)):
+async def atualizar_dados_usuario_logado(file: UploadFile, Authorization: str = Header(default=''),
+                                         usuario_atualizar: UsuarioAtualizarModel =
+                                         Depends(UsuarioAtualizarModel)):
     try:
         caminho_foto = f'files/foto-{datetime.now().strftime("%H%M%S")}'
 
@@ -67,7 +67,8 @@ async def buscar_dados_usuario_logado(file: UploadFile, Authorization: str = Hea
         token = Authorization.split(' ')[1]
         payload = authServices.decodificar_token_jwt(token)
 
-        resultado = await usuarioServices.atualizar_usuario_logado(payload['usuario_id'], usuario_atualizar, caminho_foto)
+        resultado = await usuarioServices.atualizar_usuario_logado(payload['usuario_id'], usuario_atualizar,
+                                                                   caminho_foto)
 
         os.remove(caminho_foto)
 
