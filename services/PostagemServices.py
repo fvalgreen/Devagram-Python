@@ -10,7 +10,8 @@ postagemRepository = PostagemRepository()
 
 class PostagemServices:
 
-    async def criar_postagem(self, postagem, usuario_id):
+    @staticmethod
+    async def criar_postagem(postagem, usuario_id):
 
         try:
             nova_postagem = await postagemRepository.criar_postagem(postagem.legenda, usuario_id)
@@ -28,7 +29,7 @@ class PostagemServices:
             except Exception as erro:
                 print(erro)
 
-            return{
+            return {
                 "mensagem": "Postagem criada com sucesso",
                 "dados": nova_postagem,
                 "status": 201
@@ -41,14 +42,71 @@ class PostagemServices:
 
             }
 
-
-    async def listar_postagens(self):
+    @staticmethod
+    async def listar_postagens():
         try:
             postagens = await postagemRepository.listar_postagens()
 
-            return{
+            for p in postagens:
+                p["total_curtidas"] = len(p["curtidas"])
+                p["total_comentarios"] = len(p["comentarios"])
+
+            return {
                 "mensagens": "Postagens listadas com sucesso",
                 "dados": postagens,
+                "status": 200
+            }
+        except Exception as error:
+            print(error)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
+
+    @staticmethod
+    async def curtir_postagem(postagem_id, usuario_id):
+        try:
+            postagem_encontrada = await postagemRepository.buscar_postagem_pelo_id(postagem_id)
+
+            if postagem_encontrada["curtidas"].count(usuario_id):
+                postagem_encontrada["curtidas"].remove(usuario_id)
+            else:
+                postagem_encontrada["curtidas"].append(usuario_id)
+
+            postagem_atualizada = await postagemRepository.atualizar_postagem(postagem_id, {
+                "curtidas": postagem_encontrada["curtidas"]})
+            return {
+                "mensagens": "Postagem curtida/descurtida com sucesso",
+                "dados": postagem_atualizada,
+                "status": 200
+            }
+        except Exception as error:
+            print(error)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
+
+    @staticmethod
+    async def comentar_publicacao(postagem_id, usuario_id, comentario):
+        try:
+            postagem_encontrada = await postagemRepository.buscar_postagem_pelo_id(postagem_id)
+
+            postagem_encontrada["comentarios"].append(
+                {
+                    "usuario_id": usuario_id,
+                    "comentario": comentario
+                }
+            )
+
+            postagem_atualizada = await postagemRepository.atualizar_postagem(postagem_id,
+                                                                              {"comentarios": postagem_encontrada[
+                                                                                  "comentarios"]})
+            return {
+                "mensagens": "Comentário realizado com sucesso",
+                "dados": postagem_atualizada,
                 "status": 200
             }
         except Exception as error:

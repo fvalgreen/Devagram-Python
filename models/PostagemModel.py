@@ -13,18 +13,18 @@ class PostagemModel(BaseModel):
     foto: str = Field(...)
     legenda: str = Field(...)
     data: str = Field(...)
-    curtidas: int = Field(...)
+    curtidas: List = Field(...)
     comentarios: List = Field(...)
 
     class Config:
         schema_extra = {
             "postagem": {
-                "id": "dsfasfdasdfa",
+                "id": "steadfastness",
                 "usuario_id": "id do usuário",
                 "foto": "foto.png",
                 "legenda": "Foto de fulano",
                 "data": "25/05/2023",
-                "curtidas": 0,
+                "curtidas": [],
                 "comentarios": "List[comentarios]"
             }
         }

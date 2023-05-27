@@ -21,7 +21,7 @@ class PostagemRepository:
         nova_postagem_dict = {
             "usuario_id": ObjectId(usuario_id),
             "legenda": legenda,
-            "curtidas": 0,
+            "curtidas": [],
             "comentarios": [],
             "data": datetime.now(),
             "foto": ""
@@ -58,7 +58,7 @@ class PostagemRepository:
         return postagem_collection.find({"usuario": id})
 
     async def buscar_postagem_pelo_id(self, idPostagem: str) -> dict:
-        postagem = await postagem_collection.find_one({"_id": ObjectId(id)})
+        postagem = await postagem_collection.find_one({"_id": ObjectId(idPostagem)})
 
         if postagem:
             return converterUtil.postagem_converter(postagem)
@@ -77,5 +77,5 @@ class PostagemRepository:
 
             postagem_atualizada = await postagem_collection.find_one({"_id": ObjectId(id)})
 
-            return converterUtil.postagem_converter(postagem_atualizada)  # retorna o usuário atualizado usando o helper
+            return converterUtil.postagem_converter(postagem_atualizada)
 
