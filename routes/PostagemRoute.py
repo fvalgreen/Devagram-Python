@@ -13,10 +13,10 @@ usuarioServices = UsuarioServices()
 
 
 @router.post('/',
-             response_description="Rota para criar uma nova postagem", dependencies=[Depends(
-                                                                                        verificar_token)])
-async def rota_criar_postagem(Authorization: str = Header(default=''), postagem: PostagemCriarModel
-= Depends(PostagemCriarModel)):
+             response_description="Rota para criar uma nova postagem",
+             dependencies=[Depends(verificar_token)])
+async def rota_criar_postagem(Authorization: str = Header(default=''),
+                              postagem: PostagemCriarModel = Depends(PostagemCriarModel)):
     try:
         token = Authorization.split(" ")[1]
         payload = authServices.decodificar_token_jwt(token)
@@ -29,9 +29,22 @@ async def rota_criar_postagem(Authorization: str = Header(default=''), postagem:
 
         if not resultado["status"] == 201:
             raise HTTPException(status_code=resultado["status"], detail=resultado["mensagem"])
-        print(resultado)
         return resultado
 
+    except Exception as erro:
+        raise erro
+
+
+@router.get('/',
+            response_description="Rota para criar uma nova postagem",
+            dependencies=[Depends(verificar_token)])
+async def rota_criar_postagem():
+    try:
+        resultado = await postagemService.listar_postagens()
+
+        if not resultado["status"] == 200:
+            raise HTTPException(status_code=resultado["status"], detail=resultado["mensagem"])
+        return resultado
 
     except Exception as erro:
         raise erro

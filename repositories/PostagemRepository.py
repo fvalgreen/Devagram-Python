@@ -35,7 +35,25 @@ class PostagemRepository:
         return converterUtil.postagem_converter(nova_postagem)
 
     async def listar_postagens(self):
-        return postagem_collection.find()
+        postagens_encontradas = postagem_collection.aggregate([{
+            "$lookup": {
+                "from": "usuarios",
+                "localField": "usuario_id",
+                "foreignField": "_id",
+                "as": "usuario"
+            }
+        }])
+
+        postagens = []
+
+        async for postagem in postagens_encontradas:
+            postagens.append(converterUtil.postagem_converter(postagem))
+            index = 0
+            postagens[0]["usuario"]["senha"] = ''
+
+        return postagens
+
+
     async def listar_postagens_usuario(self, id):
         return postagem_collection.find({"usuario": id})
 

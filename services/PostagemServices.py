@@ -41,3 +41,20 @@ class PostagemServices:
 
             }
 
+
+    async def listar_postagens(self):
+        try:
+            postagens = await postagemRepository.listar_postagens()
+
+            return{
+                "mensagens": "Postagens listadas com sucesso",
+                "dados": postagens,
+                "status": 200
+            }
+        except Exception as error:
+            print(error)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
