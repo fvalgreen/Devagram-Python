@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from fastapi import APIRouter, HTTPException, Depends, Header, UploadFile, Body
+from fastapi import APIRouter, HTTPException, Depends, Header, UploadFile
 from middlewares.JWTMiddleware import verificar_token
 from models.UsuarioModel import UsuarioCriarModel, UsuarioAtualizarModel
 from services.AuthService import AuthServices
@@ -26,6 +26,7 @@ async def rota_criar_usuario(file: UploadFile, usuario: UsuarioCriarModel = Depe
     # request como
     # parametro da função
     # registrar usuário e guarda o resultado num variável
+
 
     os.remove(caminho_foto)
 

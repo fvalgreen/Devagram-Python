@@ -24,13 +24,23 @@ class UsuarioRepository:
         # A função recebe um usuário com o model UsuarioCriarModel
         usuario.senha = authUtils.gerar_senha_criptografada(usuario.senha)  # Criptografa a senha do usuário para
         # guardar no DB
-        usuario_criado = await usuario_collection.insert_one(usuario.__dict__)  # guarda o usuário no DB como uma dict
+        usuario_dict = {
+            "nome": usuario.nome,
+            "email": usuario.email,
+            "senha": usuario.senha,
+            "seguidores": [],
+            "seguindo": [],
+            "publicacoes": 0
+        }
+
+        usuario_criado = await usuario_collection.insert_one(usuario_dict)  # guarda o usuário no DB como uma dict
         # O insert_one retorna um ID
         novo_usuario = await usuario_collection.find_one({"_id": usuario_criado.inserted_id})  # Buscando o usuário
         # no DB
         # usando esse ID
-
-        return converterUtil.usuario_converter(novo_usuario)  # Retorna esse usuário usando o helper para transformar
+        novo_usuario_formatado = converterUtil.usuario_converter(novo_usuario)
+        novo_usuario_formatado["senha"] = ""
+        return novo_usuario_formatado  # Retorna esse usuário usando o helper para transformar
         # ele numa dict
 
     @staticmethod

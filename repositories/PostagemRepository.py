@@ -47,15 +47,37 @@ class PostagemRepository:
         postagens = []
 
         async for postagem in postagens_encontradas:
-            postagens.append(converterUtil.postagem_converter(postagem))
-            index = 0
-            postagens[0]["usuario"]["senha"] = ''
+            postagem_formatada = converterUtil.postagem_converter(postagem)
+            postagem_formatada["usuario"]["senha"] = ''
+            postagens.append(postagem_formatada)
 
         return postagens
 
 
     async def listar_postagens_usuario(self, id):
-        return postagem_collection.find({"usuario": id})
+        postagens_encontradas = postagem_collection.aggregate([
+            {
+                "$match": {
+                    "usuario_id": ObjectId(id)
+                }
+            },
+            {
+            "$lookup": {
+                "from": "usuarios",
+                "localField": "usuario_id",
+                "foreignField": "_id",
+                "as": "usuario"
+            }
+        }])
+
+        postagens = []
+
+        async for postagem in postagens_encontradas:
+            postagem_formatada = converterUtil.postagem_converter(postagem)
+            postagem_formatada["usuario"]["senha"] = ''
+            postagens.append(postagem_formatada)
+
+        return postagens
 
     async def buscar_postagem_pelo_id(self, idPostagem: str) -> dict:
         postagem = await postagem_collection.find_one({"_id": ObjectId(idPostagem)})
@@ -64,10 +86,10 @@ class PostagemRepository:
             return converterUtil.postagem_converter(postagem)
 
     async def deletar_postagem(self, idPostagem: str):
-        postagem = await postagem_collection.find_one({"_id": ObjectId(id)})
+        postagem = await postagem_collection.find_one({"_id": ObjectId(idPostagem)})
 
         if postagem:
-            await postagem_collection.delete_one({"_id": ObjectId(id)})
+            await postagem_collection.delete_one({"_id": ObjectId(idPostagem)})
 
     async def atualizar_postagem(self, id: str, dados_postagem: dict):
         postagem = await postagem_collection.find_one({"_id": ObjectId(id)})

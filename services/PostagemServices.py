@@ -65,6 +65,28 @@ class PostagemServices:
             }
 
     @staticmethod
+    async def listar_postagens_usuario_especifico(usuario_id):
+        try:
+            postagens = await postagemRepository.listar_postagens_usuario(usuario_id)
+
+            for p in postagens:
+                p["total_curtidas"] = len(p["curtidas"])
+                p["total_comentarios"] = len(p["comentarios"])
+
+            return {
+                "mensagens": "Postagens listadas com sucesso",
+                "dados": postagens,
+                "status": 200
+            }
+        except Exception as error:
+            print(error)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
+
+    @staticmethod
     async def curtir_postagem(postagem_id, usuario_id):
         try:
             postagem_encontrada = await postagemRepository.buscar_postagem_pelo_id(postagem_id)
@@ -107,6 +129,32 @@ class PostagemServices:
             return {
                 "mensagens": "Comentário realizado com sucesso",
                 "dados": postagem_atualizada,
+                "status": 200
+            }
+        except Exception as error:
+            print(error)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
+
+
+    async def deletar_postagem(self, postagem_id, usuario_id):
+        try:
+            postagem_encontrada = await postagemRepository.buscar_postagem_pelo_id(postagem_id)
+
+            if postagem_encontrada["usuario_id"] != usuario_id:
+                return {
+                    "mensagem": "Não é possível realizar essa ação",
+                    "dados": "",
+                    "status": 401
+                }
+
+            await postagemRepository.deletar_postagem(postagem_id)
+            return {
+                "mensagem": "Postagem deletada com sucesso",
+                "dados": "",
                 "status": 200
             }
         except Exception as error:

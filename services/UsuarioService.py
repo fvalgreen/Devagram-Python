@@ -31,7 +31,7 @@ class UsuarioServices:
                     await usuarioRepository.atualizar_usuario(novo_usuario['id'], {'avatar': url_foto})
                 except Exception as erro:
                     print(erro)
-                novo_usuario["senha"] = "" # define a senha como uma string vazia para não retorna a senha do usuário
+
                 novo_usuario["avatar"] = url_foto
                 return{ # Retorna uma mensagem de sucesso e os dados do usuário
                     "mensagem": "Usuário cadastrado com sucesso",

@@ -33,9 +33,9 @@ async def rota_criar_postagem(Authorization: str = Header(default=''),
 
 
 @router.get('/',
-            response_description="Rota para criar uma nova postagem",
+            response_description="Rota para listar todas as postagem",
             dependencies=[Depends(verificar_token)])
-async def rota_criar_postagem():
+async def rota_listar_todas_postagens():
     try:
         resultado = await postagemService.listar_postagens()
 
@@ -46,9 +46,22 @@ async def rota_criar_postagem():
     except Exception as erro:
         raise erro
 
+@router.get('/{usuario_id}',
+            response_description="Rota para listar todas as postagem de um usuário específico",
+            dependencies=[Depends(verificar_token)])
+async def rota_listar_todas_postagens(usuario_id: str):
+    try:
+        resultado = await postagemService.listar_postagens_usuario_especifico(usuario_id)
+
+        if not resultado["status"] == 200:
+            raise HTTPException(status_code=resultado["status"], detail=resultado["mensagem"])
+        return resultado
+
+    except Exception as erro:
+        raise erro
 
 @router.put('/curtir/{postagem_id}',
-            response_description="Rota para curtir / descriptive uma postagem",
+            response_description="Rota para curtir / descurtir uma postagem",
             dependencies=[Depends(verificar_token)])
 async def curtir_descurtir_postagem(postagem_id: str, Authorization: str = Header(default='')):
     try:
@@ -77,6 +90,24 @@ async def criar_comentario(postagem_id: str,
 
         resultado = await postagemService.comentar_publicacao(postagem_id, payload["usuario_id"],
                                                               comentario_model.comentario)
+
+        if not resultado["status"] == 200:
+            raise HTTPException(status_code=resultado["status"], detail=resultado["mensagem"])
+        return resultado
+
+    except Exception as erro:
+        raise erro
+
+@router.delete('/deletar/{postagem_id}',
+            response_description="Rota para deletar uma postagem",
+            dependencies=[Depends(verificar_token)])
+async def deletar_postagem(postagem_id: str,
+                           Authorization: str = Header(default='')):
+    try:
+        token = Authorization.split(" ")[1]
+        payload = authServices.decodificar_token_jwt(token)
+
+        resultado = await postagemService.deletar_postagem(postagem_id, payload["usuario_id"])
 
         if not resultado["status"] == 200:
             raise HTTPException(status_code=resultado["status"], detail=resultado["mensagem"])
