@@ -53,6 +53,35 @@ async def buscar_dados_usuario_logado(Authorization: str = Header(default='')):
         print(erro)
         raise HTTPException(status_code=500, detail="Erro interno no servidor")
 
+@router.get('/{usuario_id}', response_description="Rota para receber os dados do usuário por id", dependencies=[Depends(
+    verificar_token)])
+async def buscar_dados_usuario_id(usuario_id: str, Authorization: str = Header(default='')):
+    try:
+
+        resultado = await usuarioServices.buscar_usuario(usuario_id)
+
+        if not resultado['status'] == 200:
+            raise HTTPException(status_code=resultado['status'], detail=resultado['mensagem'])
+        return resultado
+    except Exception as erro:
+        print(erro)
+        raise HTTPException(status_code=500, detail="Erro interno no servidor")
+
+@router.get('/', response_description="Rota para listar todos os usuários", dependencies=[Depends(
+    verificar_token)])
+async def listar_usuarios():
+    try:
+
+        resultado = await usuarioServices.buscar_todos_usuario()
+
+        if not resultado['status'] == 200:
+            raise HTTPException(status_code=resultado['status'], detail=resultado['mensagem'])
+        return resultado
+    except Exception as erro:
+        print(erro)
+        raise HTTPException(status_code=500, detail="Erro interno no servidor")
+
+
 
 @router.put('/me', response_description="Rota para atualizar os dados do usuário logado", dependencies=[Depends(
     verificar_token)])
@@ -72,6 +101,23 @@ async def atualizar_dados_usuario_logado(file: UploadFile, Authorization: str = 
                                                                    caminho_foto)
 
         os.remove(caminho_foto)
+
+        if not resultado['status'] == 200:
+            raise HTTPException(status_code=resultado['status'], detail=resultado['mensagem'])
+        return resultado
+    except Exception as erro:
+        print(erro)
+        raise HTTPException(status_code=500, detail="Erro interno no servidor")
+
+@router.put('/seguir/{usuario_seguir_id}', response_description="Rota para seguir um usuário",
+            dependencies=[Depends(
+    verificar_token)])
+async def seguir_usuario(usuario_seguir_id: str ,Authorization: str = Header(default='')):
+    try:
+        token = Authorization.split(' ')[1]
+        payload = authServices.decodificar_token_jwt(token)
+
+        resultado = await usuarioServices.seguir_usuario(payload["usuario_id"], usuario_seguir_id)
 
         if not resultado['status'] == 200:
             raise HTTPException(status_code=resultado['status'], detail=resultado['mensagem'])

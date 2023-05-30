@@ -45,7 +45,16 @@ class UsuarioRepository:
 
     @staticmethod
     async def listar_usuarios():  # Cria a funçãoo de buscar usuário
-        return usuario_collection.find()  # Dá um find sem parametros ns DB para buscar todos os usuários
+
+        usuarios_encontrados = usuario_collection.find()  # Dá um find sem parametros ns DB para buscar todos os
+        # usuários
+
+        usuarios = []
+
+        async for usuario in usuarios_encontrados:
+            usuarios.append(converterUtil.usuario_converter(usuario))
+
+        return usuarios
 
     @staticmethod
     async def buscar_usuario_por_id(id: str) -> dict:

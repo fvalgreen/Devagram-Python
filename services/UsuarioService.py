@@ -52,6 +52,8 @@ class UsuarioServices:
 
             if usuario_encontrado:
                 usuario_encontrado["senha"]=""
+                usuario_encontrado["total_seguindo"] = len(usuario_encontrado["seguindo"])
+                usuario_encontrado["total_seguidores"] = len(usuario_encontrado["seguidores"])
                 return { # Retorna uma mensagem de sucesso e os dados do usuário
                     "mensagem": "Usuário encontrado",
                     "dados": usuario_encontrado,
@@ -63,6 +65,27 @@ class UsuarioServices:
                     "mensagem": f"Usuário com o {id} não foi encontrado",
                     "status": 404
                 }
+        except Exception as error:
+            print(error)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
+    async def buscar_todos_usuario(self):
+        try:
+            usuarios_encontrados = await usuarioRepository.listar_usuarios()
+
+            for usuario in usuarios_encontrados:
+                usuario["total_seguindo"] = len(usuario["seguindo"])
+                usuario["total_seguidores"] = len(usuario["seguidores"])
+                usuario["senha"] = ""
+
+            return {
+                "mensagens": "Usuários listados com sucesso",
+                "dados": usuarios_encontrados,
+                "status": 200
+            }
         except Exception as error:
             print(error)
             return {
@@ -95,6 +118,37 @@ class UsuarioServices:
                     "mensagem": f"Usuário com o {id} não foi encontrado",
                     "status": 404
                 }
+        except Exception as error:
+            print(error)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
+    async def seguir_usuario(seldf, usuario_logado_id, usuario_seguir_id):
+        try:
+            usuario_logado = await usuarioRepository.buscar_usuario_por_id(usuario_logado_id)
+            usuario_seguir = await usuarioRepository.buscar_usuario_por_id(usuario_seguir_id)
+
+            if usuario_seguir["seguidores"].count(usuario_logado_id) > 0:
+                usuario_seguir["seguidores"].remove(usuario_logado_id)
+                usuario_logado["seguindo"].remove(usuario_seguir_id)
+            else:
+                usuario_seguir["seguidores"].append(usuario_logado_id)
+                usuario_logado["seguindo"].append(usuario_seguir_id)
+
+            await usuarioRepository.atualizar_usuario(usuario_seguir_id, {
+                "seguidores": usuario_seguir["seguidores"]
+            })
+            await usuarioRepository.atualizar_usuario(usuario_logado_id, {
+                "seguindo": usuario_logado["seguindo"]
+            })
+
+            return {
+                "mensagens": "Seguir / deixar de seguir realizado com sucesso",
+                "dados": "",
+                "status": 200
+            }
         except Exception as error:
             print(error)
             return {
