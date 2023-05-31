@@ -44,11 +44,10 @@ class UsuarioRepository:
         # ele numa dict
 
     @staticmethod
-    async def listar_usuarios():  # Cria a funçãoo de buscar usuário
+    async def listar_usuarios():  # Cria a função de buscar usuário
 
         usuarios_encontrados = usuario_collection.find()  # Dá um find sem parametros ns DB para buscar todos os
         # usuários
-
         usuarios = []
 
         async for usuario in usuarios_encontrados:
@@ -62,6 +61,23 @@ class UsuarioRepository:
 
         if usuario:
             return converterUtil.usuario_converter(usuario)
+
+    @staticmethod
+    async def buscar_usuario_por_filtro(nome: str):
+
+        usuarios_encontrados = usuario_collection.find({
+            "nome": {
+                "$regex": nome,
+                '$options': 'i'
+            }
+        })
+
+        usuarios = []
+
+        async for usuario in usuarios_encontrados:
+            usuarios.append(converterUtil.usuario_converter(usuario))
+
+        return usuarios
 
     @staticmethod
     async def buscar_usuario_por_email(email: str) -> dict:  # Cria a função de buscar usuário por email

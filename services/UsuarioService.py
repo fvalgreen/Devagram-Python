@@ -1,11 +1,12 @@
 from models.UsuarioModel import UsuarioCriarModel, UsuarioAtualizarModel
 from providers.AWSProvider import AWSProvider
 from repositories.UsuarioRepository import UsuarioRepository
+from repositories.PostagemRepository import PostagemRepository
 
 awsProvider = AWSProvider()
 
 usuarioRepository = UsuarioRepository()
-
+postagemRepository = PostagemRepository()
 
 class UsuarioServices:
 
@@ -49,11 +50,13 @@ class UsuarioServices:
     async def buscar_usuario(self, id: str):
         try:
             usuario_encontrado = await usuarioRepository.buscar_usuario_por_id(id)
+            postagens = await postagemRepository.listar_postagens_usuario(id)
 
             if usuario_encontrado:
                 usuario_encontrado["senha"]=""
                 usuario_encontrado["total_seguindo"] = len(usuario_encontrado["seguindo"])
                 usuario_encontrado["total_seguidores"] = len(usuario_encontrado["seguidores"])
+                usuario_encontrado["postagens"] = postagens
                 return { # Retorna uma mensagem de sucesso e os dados do usuário
                     "mensagem": "Usuário encontrado",
                     "dados": usuario_encontrado,
@@ -75,6 +78,27 @@ class UsuarioServices:
     async def buscar_todos_usuario(self):
         try:
             usuarios_encontrados = await usuarioRepository.listar_usuarios()
+
+            for usuario in usuarios_encontrados:
+                usuario["total_seguindo"] = len(usuario["seguindo"])
+                usuario["total_seguidores"] = len(usuario["seguidores"])
+                usuario["senha"] = ""
+
+            return {
+                "mensagens": "Usuários listados com sucesso",
+                "dados": usuarios_encontrados,
+                "status": 200
+            }
+        except Exception as error:
+            print(error)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
+    async def buscar_usuario_filtro(self, nome):
+        try:
+            usuarios_encontrados = await usuarioRepository.buscar_usuario_por_filtro(nome)
 
             for usuario in usuarios_encontrados:
                 usuario["total_seguindo"] = len(usuario["seguindo"])

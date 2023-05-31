@@ -67,6 +67,21 @@ async def buscar_dados_usuario_id(usuario_id: str, Authorization: str = Header(d
         print(erro)
         raise HTTPException(status_code=500, detail="Erro interno no servidor")
 
+@router.get('/filtrar/{nome}', response_description="Rota para receber os dados do usuário por filtro", dependencies=[
+    Depends(
+    verificar_token)])
+async def buscar_dados_usuario_filtro(nome: str, Authorization: str = Header(default='')):
+    try:
+
+        resultado = await usuarioServices.buscar_usuario_filtro(nome)
+
+        if not resultado['status'] == 200:
+            raise HTTPException(status_code=resultado['status'], detail=resultado['mensagem'])
+        return resultado
+    except Exception as erro:
+        print(erro)
+        raise HTTPException(status_code=500, detail="Erro interno no servidor")
+
 @router.get('/', response_description="Rota para listar todos os usuários", dependencies=[Depends(
     verificar_token)])
 async def listar_usuarios():

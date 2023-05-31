@@ -2,11 +2,12 @@ import os
 from datetime import datetime
 from providers.AWSProvider import AWSProvider
 from repositories.PostagemRepository import PostagemRepository
+from repositories.UsuarioRepository import UsuarioRepository
 
 awsProvider = AWSProvider()
 
 postagemRepository = PostagemRepository()
-
+usuarioRepository = UsuarioRepository()
 
 class PostagemServices:
 
@@ -15,6 +16,7 @@ class PostagemServices:
 
         try:
             nova_postagem = await postagemRepository.criar_postagem(postagem.legenda, usuario_id)
+            usuario_encontrado = await usuarioRepository.buscar_usuario_por_id(usuario_id)
 
             try:
                 caminho_foto = f'files/foto-{datetime.now().strftime("%H%M%S")}'
@@ -25,6 +27,9 @@ class PostagemServices:
                                                          caminho_foto).split('?')[0]
 
                 nova_postagem = await postagemRepository.atualizar_postagem(nova_postagem["id"], {"foto": url_foto})
+                if nova_postagem:
+                    publicacoes_totais = usuario_encontrado["publicacoes"] + 1
+                    await usuarioRepository.atualizar_usuario(usuario_id, {"publicacoes": publicacoes_totais})
                 os.remove(caminho_foto)
             except Exception as erro:
                 print(erro)
