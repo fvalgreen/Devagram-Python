@@ -137,3 +137,24 @@ async def deletar_comentario(postagem_id: str, comentario_id: str,
 
     except Exception as erro:
         raise erro
+
+@router.put('/{postagem_id}/comentario/{comentario_id}',
+            response_description="Rota para curtir / descurtir uma postagem",
+            dependencies=[Depends(verificar_token)])
+async def curtir_descurtir_postagem(postagem_id: str, comentario_id: str, Authorization: str = Header(default=''),
+                                    comentario_model: ComentarioCriarModel = Body(...)):
+    try:
+        token = Authorization.split(" ")[1]
+        payload = authServices.decodificar_token_jwt(token)
+
+        resultado = await postagemService.atualizar_comentario(postagem_id,
+                                                               comentario_id,
+                                                               payload["usuario_id"],
+                                                               comentario_model.comentario)
+
+        if not resultado["status"] == 200:
+            raise HTTPException(status_code=resultado["status"], detail=resultado["mensagem"])
+        return resultado
+
+    except Exception as erro:
+        raise erro

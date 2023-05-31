@@ -162,7 +162,7 @@ class PostagemServices:
                         return {
                             "mensagem": "Operação inválida",
                             "dados": "",
-                            "status": 400
+                            "status": 401
                         }
 
             postagem_atualizada = await postagemRepository.atualizar_postagem(postagem_id,
@@ -170,6 +170,38 @@ class PostagemServices:
                                                                                   "comentarios"]})
             return {
                 "mensagem": "Comentário realizado com sucesso",
+                "dados": postagem_atualizada,
+                "status": 200
+            }
+        except Exception as error:
+            print(error)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
+
+    @staticmethod
+    async def atualizar_comentario(postagem_id, comentario_id, usuario_id, comentario_novo):
+        try:
+            postagem_encontrada = await postagemRepository.buscar_postagem_pelo_id(postagem_id)
+
+            for comentario in postagem_encontrada["comentarios"]:
+                if comentario["comentario_id"] == comentario_id:
+                    if comentario["usuario_id"] == usuario_id:
+                        comentario["comentario"] = comentario_novo
+                    else:
+                        return {
+                            "mensagem": "Operação inválida",
+                            "dados": "",
+                            "status": 401
+                        }
+
+            postagem_atualizada = await postagemRepository.atualizar_postagem(postagem_id,
+                                                                              {"comentarios": postagem_encontrada[
+                                                                                  "comentarios"]})
+            return {
+                "mensagem": "Comentário atualizado com sucesso",
                 "dados": postagem_atualizada,
                 "status": 200
             }
