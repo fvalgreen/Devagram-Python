@@ -1,5 +1,8 @@
 import os
 from datetime import datetime
+
+from bson import ObjectId
+
 from providers.AWSProvider import AWSProvider
 from repositories.PostagemRepository import PostagemRepository
 from repositories.UsuarioRepository import UsuarioRepository
@@ -8,6 +11,7 @@ awsProvider = AWSProvider()
 
 postagemRepository = PostagemRepository()
 usuarioRepository = UsuarioRepository()
+
 
 class PostagemServices:
 
@@ -123,6 +127,7 @@ class PostagemServices:
 
             postagem_encontrada["comentarios"].append(
                 {
+                    "comentario_id": ObjectId(),
                     "usuario_id": usuario_id,
                     "comentario": comentario
                 }
@@ -132,7 +137,7 @@ class PostagemServices:
                                                                               {"comentarios": postagem_encontrada[
                                                                                   "comentarios"]})
             return {
-                "mensagens": "Comentário realizado com sucesso",
+                "mensagem": "Comentário realizado com sucesso",
                 "dados": postagem_atualizada,
                 "status": 200
             }
@@ -144,8 +149,40 @@ class PostagemServices:
                 "status": 500
             }
 
+    @staticmethod
+    async def deletar_comentario(postagem_id, comentario_id, usuario_id):
+        try:
+            postagem_encontrada = await postagemRepository.buscar_postagem_pelo_id(postagem_id)
 
-    async def deletar_postagem(self, postagem_id, usuario_id):
+            for comentario in postagem_encontrada["comentarios"]:
+                if comentario["comentario_id"] == comentario_id:
+                    if comentario["usuario_id"] == usuario_id or postagem_encontrada["usuario_id"] == usuario_id:
+                        postagem_encontrada["comentarios"].remove(comentario)
+                    else:
+                        return {
+                            "mensagem": "Operação inválida",
+                            "dados": "",
+                            "status": 400
+                        }
+
+            postagem_atualizada = await postagemRepository.atualizar_postagem(postagem_id,
+                                                                              {"comentarios": postagem_encontrada[
+                                                                                  "comentarios"]})
+            return {
+                "mensagem": "Comentário realizado com sucesso",
+                "dados": postagem_atualizada,
+                "status": 200
+            }
+        except Exception as error:
+            print(error)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
+
+    @staticmethod
+    async def deletar_postagem(postagem_id, usuario_id):
         try:
             postagem_encontrada = await postagemRepository.buscar_postagem_pelo_id(postagem_id)
 

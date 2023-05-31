@@ -1,6 +1,7 @@
 class ConverterUtil:
 
-    def usuario_converter(self, usuario):  # define uma função helper que pega o usuário e transforma numa dict
+    @staticmethod
+    def usuario_converter(usuario):  # define uma função helper que pega o usuário e transforma numa dict
 
         return {
             "id": str(usuario["_id"]),
@@ -13,7 +14,6 @@ class ConverterUtil:
             "publicacoes": usuario['publicacoes']
         }
 
-
     def postagem_converter(self, postagem):
         return {
             "id": str(postagem["_id"]) if "_id" in postagem else "",
@@ -22,7 +22,13 @@ class ConverterUtil:
             "legenda": postagem["legenda"] if "legenda" in postagem else "",
             "data": postagem["data"] if "data" in postagem else "",
             "curtidas": postagem["curtidas"] if "curtidas" in postagem else "",
-            "comentarios": postagem["comentarios"] if "comentarios" in postagem else "",
-            "usuario": self.usuario_converter(postagem["usuario"][0]) if "usuario" in postagem and len(postagem[
-                                                                                                        "usuario"]) > 0 else ""
+            "comentarios": [
+                {
+                    "comentario": c["comentario"],
+                    "comentario_id": str(c["comentario_id"]),
+                    "usuario_id": c["usuario_id"]
+                } for c in postagem["comentarios"]
+            ] if "comentarios" in postagem else "",
+            "usuario": self.usuario_converter(postagem["usuario"][0]) if "usuario" in postagem and
+                                                                         len(postagem["usuario"]) > 0 else ""
         }
