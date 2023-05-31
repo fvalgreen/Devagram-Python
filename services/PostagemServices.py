@@ -73,6 +73,31 @@ class PostagemServices:
                 "status": 500
             }
 
+    async def listar_postagens_seguidos(self, usuario_id):
+        try:
+            postagens = await postagemRepository.listar_postagens()
+            usuario_logado = await usuarioRepository.buscar_usuario_por_id(usuario_id)
+            postagens_seguidos = []
+            for p in postagens:
+                p["total_curtidas"] = len(p["curtidas"])
+                p["total_comentarios"] = len(p["comentarios"])
+                for seguindo in usuario_logado["seguindo"]:
+                    if p["usuario_id"] == seguindo or p["usuario_id"] == usuario_id:
+                        postagens_seguidos.append(p)
+
+            return {
+                "mensagens": "Postagens listadas com sucesso",
+                "dados": postagens_seguidos,
+                "status": 200
+            }
+        except Exception as error:
+            print(error)
+            return {
+                "mensagem": "Erro interno no servidor",
+                "dados": str(error),
+                "status": 500
+            }
+
     @staticmethod
     async def listar_postagens_usuario_especifico(usuario_id):
         try:

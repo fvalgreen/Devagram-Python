@@ -46,6 +46,22 @@ async def rota_listar_todas_postagens():
     except Exception as erro:
         raise erro
 
+@router.get('/seguidos',
+            response_description="Rota para listar todas as postagem dos usuários seguidos",
+            dependencies=[Depends(verificar_token)])
+async def rota_listar_postagens_seguidos(Authorization: str = Header(default='')):
+    try:
+        token = Authorization.split(" ")[1]
+        payload = authServices.decodificar_token_jwt(token)
+
+        resultado = await postagemService.listar_postagens_seguidos(payload["usuario_id"])
+
+        if not resultado["status"] == 200:
+            raise HTTPException(status_code=resultado["status"], detail=resultado["mensagem"])
+        return resultado
+
+    except Exception as erro:
+        raise erro
 
 @router.get('/{usuario_id}',
             response_description="Rota para listar todas as postagem de um usuário específico",
