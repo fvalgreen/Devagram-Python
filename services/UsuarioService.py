@@ -2,6 +2,7 @@ from models.UsuarioModel import UsuarioCriarModel, UsuarioAtualizarModel
 from providers.AWSProvider import AWSProvider
 from repositories.UsuarioRepository import UsuarioRepository
 from repositories.PostagemRepository import PostagemRepository
+from dtos.ReturnDto import ReturnDto
 
 awsProvider = AWSProvider()
 
@@ -10,20 +11,14 @@ postagemRepository = PostagemRepository()
 
 class UsuarioServices:
 
-    async def registrar_usuario(self, usuario: UsuarioCriarModel, caminho_foto: str): # Cria a função de registrar o
-        # usuário
+    async def registrar_usuario(self, usuario: UsuarioCriarModel, caminho_foto: str):
         try:
-            usuario_encontrado = await usuarioRepository.buscar_usuario_por_email(usuario.email) # busca o usuário na
-            # DB pelo email
+            usuario_encontrado = await usuarioRepository.buscar_usuario_por_email(usuario.email)
 
-            if usuario_encontrado: # Caso retorne algum usuário com esse e-amil dá um erro informando que o e-mail já
-                # está cadastrado no sistema
-                return {
-                    "mensagem": f'E-mail  {usuario.email} já está cadastrado no sistema',
-                    "dados": "",
-                    "status": 400
-                }
-            else: # Caso não retorne nenhum usuário com esse e-mail cria o usuário passando os dados
+            if usuario_encontrado:
+                return ReturnDto(f'E-mail  {usuario.email} já está cadastrado no sistema', "", 400)
+
+            else:
                 novo_usuario = await usuarioRepository.criar_usuario(usuario)
                 try:
                     url_foto = awsProvider.upload_arquivo_s3(f'fotos-perfil/{novo_usuario["id"]}.png',
@@ -34,18 +29,10 @@ class UsuarioServices:
                     print(erro)
 
                 novo_usuario["avatar"] = url_foto
-                return{ # Retorna uma mensagem de sucesso e os dados do usuário
-                    "mensagem": "Usuário cadastrado com sucesso",
-                    "dados": novo_usuario,
-                    "status": 201
-                }
-        except Exception as error:
-            return {
-                "mensagem": "Erro interno no servidor",
-                "dados": str(error),
-                "status": 500
+                return ReturnDto("Usuário cadastrado com sucesso", novo_usuario, 201)
 
-            }
+        except Exception as error:
+            return ReturnDto("Erro interno no servidor", str(error), 500)
 
     async def buscar_usuario(self, id: str):
         try:
@@ -57,24 +44,14 @@ class UsuarioServices:
                 usuario_encontrado["total_seguindo"] = len(usuario_encontrado["seguindo"])
                 usuario_encontrado["total_seguidores"] = len(usuario_encontrado["seguidores"])
                 usuario_encontrado["postagens"] = postagens
-                return { # Retorna uma mensagem de sucesso e os dados do usuário
-                    "mensagem": "Usuário encontrado",
-                    "dados": usuario_encontrado,
-                    "status": 200
-                }
+                return ReturnDto("Usuário encontrado", usuario_encontrado, 200)
 
             else:
-                return {
-                    "mensagem": f"Usuário com o {id} não foi encontrado",
-                    "status": 404
-                }
+                return ReturnDto(f"Usuário com o {id} não foi encontrado", "", 404)
+
         except Exception as error:
             print(error)
-            return {
-                "mensagem": "Erro interno no servidor",
-                "dados": str(error),
-                "status": 500
-            }
+            return ReturnDto("Erro interno no servidor", str(error), 500)
     async def buscar_todos_usuario(self):
         try:
             usuarios_encontrados = await usuarioRepository.listar_usuarios()
@@ -83,19 +60,11 @@ class UsuarioServices:
                 usuario["total_seguindo"] = len(usuario["seguindo"])
                 usuario["total_seguidores"] = len(usuario["seguidores"])
                 usuario["senha"] = ""
+            return ReturnDto("Usuários listados com sucesso", usuarios_encontrados, 200)
 
-            return {
-                "mensagens": "Usuários listados com sucesso",
-                "dados": usuarios_encontrados,
-                "status": 200
-            }
         except Exception as error:
             print(error)
-            return {
-                "mensagem": "Erro interno no servidor",
-                "dados": str(error),
-                "status": 500
-            }
+            return ReturnDto("Erro interno no servidor", str(error), 500)
     async def buscar_usuario_filtro(self, nome):
         try:
             usuarios_encontrados = await usuarioRepository.buscar_usuario_por_filtro(nome)
@@ -104,19 +73,11 @@ class UsuarioServices:
                 usuario["total_seguindo"] = len(usuario["seguindo"])
                 usuario["total_seguidores"] = len(usuario["seguidores"])
                 usuario["senha"] = ""
+            return ReturnDto("Usuários listados com sucesso", usuarios_encontrados, 200)
 
-            return {
-                "mensagens": "Usuários listados com sucesso",
-                "dados": usuarios_encontrados,
-                "status": 200
-            }
         except Exception as error:
             print(error)
-            return {
-                "mensagem": "Erro interno no servidor",
-                "dados": str(error),
-                "status": 500
-            }
+            return ReturnDto("Erro interno no servidor", str(error), 500)
     async def atualizar_usuario_logado(self, id, usuarioAtualizar: UsuarioAtualizarModel, caminho_foto: str):
         try:
             usuario_encontrado = await usuarioRepository.buscar_usuario_por_id(id)
@@ -131,24 +92,15 @@ class UsuarioServices:
                     print(erro)
                 usuario_atualizado = await usuarioRepository.atualizar_usuario(id, usuarioAtualizar.__dict__)
                 usuario_atualizado['senha'] = ''
-                return {
-                    "mensagem": "Usuário atualizado com sucesso",
-                    "dados": usuario_atualizado,
-                    "status": 200
-                }
+
+                return ReturnDto("Usuário atualizado com sucesso", usuario_atualizado, 200)
 
             else:
-                return {
-                    "mensagem": f"Usuário com o {id} não foi encontrado",
-                    "status": 404
-                }
+                return ReturnDto(f"Usuário com o {id} não foi encontrado", "", 404)
+
         except Exception as error:
             print(error)
-            return {
-                "mensagem": "Erro interno no servidor",
-                "dados": str(error),
-                "status": 500
-            }
+            return ReturnDto("Erro interno no servidor", str(error), 500)
     async def seguir_usuario(seldf, usuario_logado_id, usuario_seguir_id):
         try:
             usuario_logado = await usuarioRepository.buscar_usuario_por_id(usuario_logado_id)
@@ -168,6 +120,7 @@ class UsuarioServices:
                 "seguindo": usuario_logado["seguindo"]
             })
 
+            return ReturnDto("Seguir / deixar de seguir realizado com sucesso", "", 200)
             return {
                 "mensagens": "Seguir / deixar de seguir realizado com sucesso",
                 "dados": "",
@@ -175,8 +128,4 @@ class UsuarioServices:
             }
         except Exception as error:
             print(error)
-            return {
-                "mensagem": "Erro interno no servidor",
-                "dados": str(error),
-                "status": 500
-            }
+            return ReturnDto("Erro interno no servidor", str(error), 500)

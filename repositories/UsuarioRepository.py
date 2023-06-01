@@ -20,10 +20,8 @@ authUtils = AuthUtils()
 
 class UsuarioRepository:
     @staticmethod
-    async def criar_usuario(usuario: UsuarioCriarModel) -> dict:  # cria a função de criar o usuário na DB
-        # A função recebe um usuário com o model UsuarioCriarModel
-        usuario.senha = authUtils.gerar_senha_criptografada(usuario.senha)  # Criptografa a senha do usuário para
-        # guardar no DB
+    async def criar_usuario(usuario: UsuarioCriarModel) -> dict:
+        usuario.senha = authUtils.gerar_senha_criptografada(usuario.senha)
         usuario_dict = {
             "nome": usuario.nome,
             "email": usuario.email,
@@ -33,21 +31,16 @@ class UsuarioRepository:
             "publicacoes": 0
         }
 
-        usuario_criado = await usuario_collection.insert_one(usuario_dict)  # guarda o usuário no DB como uma dict
-        # O insert_one retorna um ID
-        novo_usuario = await usuario_collection.find_one({"_id": usuario_criado.inserted_id})  # Buscando o usuário
-        # no DB
-        # usando esse ID
+        usuario_criado = await usuario_collection.insert_one(usuario_dict)
+        novo_usuario = await usuario_collection.find_one({"_id": usuario_criado.inserted_id})
         novo_usuario_formatado = converterUtil.usuario_converter(novo_usuario)
         novo_usuario_formatado["senha"] = ""
-        return novo_usuario_formatado  # Retorna esse usuário usando o helper para transformar
-        # ele numa dict
+        return novo_usuario_formatado
 
     @staticmethod
-    async def listar_usuarios():  # Cria a função de buscar usuário
+    async def listar_usuarios():
 
-        usuarios_encontrados = usuario_collection.find()  # Dá um find sem parametros ns DB para buscar todos os
-        # usuários
+        usuarios_encontrados = usuario_collection.find()
         usuarios = []
 
         async for usuario in usuarios_encontrados:
@@ -80,28 +73,26 @@ class UsuarioRepository:
         return usuarios
 
     @staticmethod
-    async def buscar_usuario_por_email(email: str) -> dict:  # Cria a função de buscar usuário por email
-        usuario = await usuario_collection.find_one({"email": email})  # Dá um find_one ns DB passando como parametro o
-        # email do usuário informado
+    async def buscar_usuario_por_email(email: str) -> dict:
+        usuario = await usuario_collection.find_one({"email": email})
 
-        if usuario:  # Caso haja um usuário com esse email na DB retorna ele usando o helper
+        if usuario:
             return converterUtil.usuario_converter(usuario)
 
     @staticmethod
-    async def atualizar_usuario(id: str, dados_usuario: dict):  # Cria a função de atualizar os dados do usuário,
-        # recebendo como parametros o id do usuário a ser atualizado e os dados a serem atualizados
-        usuario = await usuario_collection.find_one({"_id": ObjectId(id)})  # Busca o usuário na DB usando o ID
+    async def atualizar_usuario(id: str, dados_usuario: dict):
+        usuario = await usuario_collection.find_one({"_id": ObjectId(id)})
 
-        if usuario:  # Caso retorne um usuário com esse id
+        if usuario:
             await usuario_collection.update_one({"_id": ObjectId(id)}, {"$set": dados_usuario})
-            # atualiza os dados na DB passando o id e os dados a serem alterados
+
             usuario_atualizado = await usuario_collection.find_one({"_id": ObjectId(id)})
 
-            return converterUtil.usuario_converter(usuario_atualizado)  # retorna o usuário atualizado usando o helper
+            return converterUtil.usuario_converter(usuario_atualizado)
 
     @staticmethod
-    async def deletar_usuario(id: str):  # Cria a função de deletar um usuário
-        usuario = await usuario_collection.find_one({"_id": ObjectId(id)})  # busca na DB o usuário pelo ID
+    async def deletar_usuario(id: str):
+        usuario = await usuario_collection.find_one({"_id": ObjectId(id)})
 
-        if usuario:  # Caso haja um usuário com esse ID remove ele da DB
+        if usuario:
             await usuario_collection.delete_one({"_id": ObjectId(id)})

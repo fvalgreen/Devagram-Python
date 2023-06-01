@@ -19,13 +19,13 @@ class PostagemModel(BaseModel):
     class Config:
         schema_extra = {
             "postagem": {
-                "id": "steadfastness",
-                "usuario_id": "id do usuário",
-                "foto": "foto.png",
-                "legenda": "Foto de fulano",
-                "data": "25/05/2023",
-                "curtidas": [],
-                "comentarios": "List[comentarios]"
+                "id": "string",
+                "usuario_id": "string",
+                "foto": "string",
+                "legenda": "string",
+                "data": "Date",
+                "curtidas": "List",
+                "comentarios": "List"
             }
         }
 
@@ -38,6 +38,6 @@ class PostagemCriarModel(BaseModel):
     class Config:
         schema_extra = {
             "postagem": {
-                "legenda": "Foto de fulano",
+                "legenda": "string",
             }
         }

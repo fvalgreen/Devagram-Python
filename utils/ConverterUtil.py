@@ -1,8 +1,7 @@
 class ConverterUtil:
 
     @staticmethod
-    def usuario_converter(usuario):  # define uma função helper que pega o usuário e transforma numa dict
-
+    def usuario_converter(usuario):
         return {
             "id": str(usuario["_id"]),
             "nome": usuario['nome'],
